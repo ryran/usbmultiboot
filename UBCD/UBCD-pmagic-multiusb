@@ -1,14 +1,17 @@
 #!/bin/bash
 # UBCD-pmagic-multiusb v0.9 last mod 2011.10.01
-# by Ryan Sawhill, ryan@b19.org 
-# <http://github.com/ryran/usbmultiboot>
-#-------------------------------------------------------------------------------
-#    Copyright 2011 Ryan Sawhill
+# Latest version at <http://github.com/ryran/usbmultiboot>
+# Copyright 2011 Ryan Sawhill <ryan@b19.org>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version. See <gnu.org/licenses/gpl.html>.
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+#    General Public License <gnu.org/licenses/gpl.html> for more details.
 #-------------------------------------------------------------------------------
 # PROBLEM: I wanted a usb drive to contain multiple linux distros, along with
 # the awesome Ultimate Boot CD. I was able to partly-accomplish this using the
@@ -35,7 +38,8 @@
 # com32 /multiboot/UBCD/boot/syslinux/menu.c32
 # append /multiboot/UBCD/ubcd/menus/syslinux/main.cfg
 #
-# (If you're struggling with that, see <github.com/ryran/usbmultiboot>.)
+# If you're struggling with that part, see <github.com/ryran/usbmultiboot>.
+#
 # Finally, you'll need to run *this* script from the root of your extracted
 # ubcd.iso (e.g., USBDRIVE/multiboot/UBCD/) to modify the various syslinux cfg
 # files in UBCD to deal with the new paths, as well as a couple other fixes.
