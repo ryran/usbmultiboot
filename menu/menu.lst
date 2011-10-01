@@ -1,0 +1,31 @@
+default 1
+#timeout 30
+color NORMAL HIGHLIGHT HELPTEXT HEADING
+#splashimage=/multiboot/menu/yumi.xpm.gz
+foreground=FFFFFF
+background=000000
+
+title --- Other Direct-Boot ISOs ---
+root
+
+# Modify the following memory based entry if it does not boot
+title SpinRite6.iso
+find --set-root --ignore-floppies --ignore-cd /multiboot/ISOS/SpinRite6.iso
+map --heads=0 --sectors-per-track=0 --mem /multiboot/ISOS/SpinRite6.iso (hd32)
+map --hook
+root (hd32)
+chainloader (hd32)
+
+# Modify the following entry if it does not boot
+title CentOS-6.0-x86_64-minimal.iso
+find --set-root --ignore-floppies --ignore-cd /multiboot/ISOS/CentOS-6.0-x86_64-minimal.iso
+map --heads=0 --sectors-per-track=0 /multiboot/ISOS/CentOS-6.0-x86_64-minimal.iso (hd32)
+map --hook
+chainloader (hd32)
+
+# Modify the following entry if it does not boot
+title CentOS-6.0-x86_64-netinstall.iso
+find --set-root --ignore-floppies --ignore-cd /multiboot/ISOS/CentOS-6.0-x86_64-netinstall.iso
+map --heads=0 --sectors-per-track=0 /multiboot/ISOS/CentOS-6.0-x86_64-netinstall.iso (hd32)
+map --hook
+chainloader (hd32)

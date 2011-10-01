@@ -1,0 +1,86 @@
+#!/bin/bash
+# UBCD-pmagic-multiusb v0.9 last mod 2011.10.01
+# by Ryan Sawhill, ryan@b19.org 
+# <http://github.com/ryran/usbmultiboot>
+#-------------------------------------------------------------------------------
+#    Copyright 2011 Ryan Sawhill
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version. See <gnu.org/licenses/gpl.html>.
+#-------------------------------------------------------------------------------
+# PROBLEM: I wanted a usb drive to contain multiple linux distros, along with
+# the awesome Ultimate Boot CD. I was able to partly-accomplish this using the
+# excellent YUMI tool from the Pendrivelinux folks; however, upon booting up
+# UBCD from my new usb, I soon realized that Parted Magic failed to load. 
+#
+# SOLUTION: I got started with YUMI, but ended up modifying everything. My USB
+# contains a 'multiboot' folder, which contains all my configs & isos,
+# including the extracted ubcd.iso in 'multiboot/UBCD'. That didn't solve the
+# problem of PMagic (from inside UBCD) not booting though. For that, I found
+# that moving the pmodules directory was required (see below). So this script
+# does that, plus a little extra. You'll have to tweak it a bit of course if
+# your set-up is different--duh. But if you just want to get things going, you
+# could use YUMI in Windows to create your multiboot-usb -- add whatever
+# distros you want, and then extract ubcd.iso like I did, to 'multiboot/UBCD'.
+# You'll then need to manually add an entry for UBCD to your main syslinux.cfg
+# ... something like the following:
+#
+# label UBCD
+# menu label ^UBCD
+# text help
+# Open Ultimate Boot CD main menu. [Esc, Enter] to come back here.
+# endtext
+# com32 /multiboot/UBCD/boot/syslinux/menu.c32
+# append /multiboot/UBCD/ubcd/menus/syslinux/main.cfg
+#
+# (If you're struggling with that, see <github.com/ryran/usbmultiboot>.)
+# Finally, you'll need to run *this* script from the root of your extracted
+# ubcd.iso (e.g., USBDRIVE/multiboot/UBCD/) to modify the various syslinux cfg
+# files in UBCD to deal with the new paths, as well as a couple other fixes.
+# NOTE: This was written for and tested on UBCD V5.1.1, but it should not be
+# necessary to modify it for newer versions. Hit me up if you've got questions
+# or suggestions or thanks!
+#-------------------------------------------------------------------------------
+
+# WHEREAMI
+if [ ! -d ubcd/menus/syslinux/ || ! -f pmagic/boot/syslinux/syslinux.cfg ]; then
+	echo -e "It doesn't look like you're running this script from the proper place.\nIt should be executed from a folder containing the fully-extracted UBCD iso.\nDoing nothing."
+	exit 1
+fi
+
+# MODIFY UBCD SYSLINUX MENUS
+sed -i -e 's, /boot, /multiboot/UBCD/boot,g' -e 's,=/boot,=/multiboot/UBCD/boot,g' -e 's, /pmagic, /multiboot/UBCD/pmagic,g' -e 's, /ubcd, /multiboot/UBCD/ubcd,g' -e 's,localboot.c32 -1,localboot.c32 -2,' -e 's,/pmagic/pmagic/bzImage,/ubcd/boot/cpustress/bzImage,' $(find ubcd/menus/syslinux/ -iname '*.cfg')
+
+# MODIFY PMAGIC SYSLINUX MENU
+sed -i -e 's,iso_filename=ubcd511.iso,directory=/multiboot/UBCD/pmagic/,' -e 's, /pmagic, /multiboot/UBCD/pmagic,g' -e 's,=/pmagic,=/multiboot/UBCD/pmagic,g' pmagic/boot/syslinux/syslinux.cfg
+
+# You can run these (copy & paste) to check your work before and after. You
+# might need to modify the '**/*.cfg' part....
+# grep -hr ' /boot\|=/boot' **/*.cfg | sort -u | grep --color -hr ' /boot\|=/boot'
+# grep -hr ' /pmagic\|=/pmagic' **/*.cfg | sort -u | grep --color -hr ' /pmagic\|=/pmagic'
+# grep -hr ' /ubcd\|=/ubcd' **/*.cfg | sort -u | grep --color -hr ' /ubcd\|=/ubcd'
+
+# MOVE PARTED MAGIC'S PMODULES DIR TO BYPASS MISSING *.sqfs FILE
+if [ -d pmagic/pmodules/ ]; then
+	mv -v pmagic/pmodules/ pmagic/pmagic/pmodules/
+	echo -e "Moved pmodules dir in preparation for multiboot usb. Before running the\nantivirus update scripts in ubcd/tools/linux/antivirus/, run the new\nmove-pmodules.sh script [in the same location] to toggle pmodules back to its\noriginal location. Once finished making new av definitions, run it again."
+fi
+
+# This creates a simple toggling script in the linux antivirus tools dir.
+# Run it before and after running the antivirus updating scripts.
+[ -d ubcd/tools/linux/antivirus/ ] &&
+cat > ubcd/tools/linux/antivirus/move-pmodules.sh <<\EOF
+#!/bin/bash
+if [ -d ../../../../pmagic/pmagic/pmodules/ ]; then
+	mv -v ../../../../pmagic/pmagic/pmodules/ ../../../../pmagic/pmodules/
+	echo "pmodules dir now in original location -- ready to run AV update scripts"
+elif [ -d ../../../../pmagic/pmodules/ ]; then
+	mv -v ../../../../pmagic/pmodules/ ../../../../pmagic/pmagic/pmodules/
+	echo "pmodules dir now in proper place for mutliboot usb -- don't run av scripts"
+else
+	echo "Cannot find pmodules directory to move!"
+	exit 1
+fi
+EOF
