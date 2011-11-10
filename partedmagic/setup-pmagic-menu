@@ -4,4 +4,4 @@
 # First, we need to extract Parted Magic to 'multiboot/partedmagic' dir, on the usb.
 # Then all that needs to be done to prep Parted Magic's syslinux.cfg file for use in the multiboot setup is this one sed command.
 
-sed -i -e 's,bzImage,& directory=/multiboot/partedmagic/,' -e 's,linux.c32,/multiboot/partedmagic/boot/syslinux/&,' -e 's,/boot,/multiboot/partedmagic&,g' -e 's,/pmagic/,/multiboot/partedmagic&,g' boot/syslinux/syslinux.cfg
+sed -i -e 's,bzImage,& directory=/multiboot/partedmagic/,' -e 's,/boot,/multiboot/partedmagic&,g' -e 's,/pmagic/,/multiboot/partedmagic&,g' -e 's,linux.c32,/multiboot/partedmagic/boot/syslinux/&,' boot/syslinux/syslinux.cfg
